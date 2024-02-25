@@ -1,5 +1,6 @@
 ```markdown
 # Task Manager API
+```
 
 This repository contains code for a task manager API built using Golang and MongoDB.
 
@@ -105,9 +106,7 @@ func updateTask(c *gin.Context) {
 
 ```go
 func deleteTask(c *gin.Context) {
-	// Retrieve the task ID from the URL parameter
 	id := c.Param("id")
-	// Delete the task from the database based on the ID
 	collection := client.Database("taskdb").Collection("tasks")
 	_, err := collection.DeleteOne(context.Background(), bson.M{"_id": id})
 	if err != nil {
@@ -125,11 +124,9 @@ func deleteTask(c *gin.Context) {
 
 ```go
 func listTasks(c *gin.Context) {
-	// Fetch all tasks from the database
 	collection := client.Database("taskdb").Collection("tasks")
 	cursor, err := collection.Find(context.Background(), bson.M{})
 	if err != nil {
-		// Return an Internal Server Error response if database operation fails
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list tasks"})
 		return
 	}
@@ -142,6 +139,39 @@ func listTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 ```
+## Main Function
+
+The main function in the project is responsible for setting up the MongoDB client, defining API endpoints, and starting the HTTP server.
+
+```go
+func main() {
+    // Set up MongoDB client
+    var err error
+    client, err = mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+    if err != nil {
+        log.Fatal(err)
+    }
+    err = client.Connect(context.Background())
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Create a new Gin router
+    router := gin.Default()
+
+    // Define API endpoints
+    router.POST("/tasks", createTask)
+    router.GET("/tasks/:id", getTask)
+    router.PUT("/tasks/:id", updateTask)
+    router.DELETE("/tasks/:id", deleteTask)
+    router.GET("/tasks", listTasks)
+
+    // Start the HTTP server on port 8080
+    router.Run(":8080")
+}
+```
+
+The main function initializes the MongoDB client, sets up the Gin router, defines API endpoints for creating, retrieving, updating, and deleting tasks, and starts the HTTP server on port 8080.
 
 ## Getting Started
 
